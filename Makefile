@@ -9,5 +9,5 @@ build-container:
 run-container:
 	docker run -p 5432:5432 \
 		-e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-		-v ./src:/usr/share/pg-custom-functions \
+		-v ./:/usr/share/pg-custom-functions \
 		${DOCKER_TAG}

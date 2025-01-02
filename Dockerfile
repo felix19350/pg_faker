@@ -5,7 +5,6 @@ FROM postgres:17.2-bookworm
 # The src directory will be mounted here at runtime.
 RUN mkdir -p /usr/share/pg-custom-functions
 
-
 # Ensure dev tools are installed
 RUN apt update && apt install build-essential postgresql-server-dev-17 -y
 
