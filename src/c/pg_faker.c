@@ -46,24 +46,6 @@ Datum fake_person_name(PG_FUNCTION_ARGS)
     char full_name[length];
     sprintf(full_name, "%s %s", selected_name, selected_surname);
 
-    /*
-     * VARSIZE_ANY_EXHDR is the size of the struct in bytes, minus the
-     * VARHDRSZ or VARHDRSZ_SHORT of its header. Construct the copy with a
-     * full-length header.
-
-    // VARSIZE_ANY_EXHDR(t) is not working
-    int pg_text_len = length + VARHDRSZ;
-    text *result = (text *)palloc(length);
-    SET_VARSIZE(result, pg_text_len);
-
-    memcpy(VARDATA(result),
-           full_name,
-           length);
-
-    char log_msg[64];
-    sprintf(log_msg, "%s | %s", result->vl_len_, result->vl_dat);
-    ereport(INFO, errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg(log_msg));
-    */
     // See: https://github.com/postgres/postgres/blob/11012c503759f8018d8831bc6eb1f998eba7ad25/src/backend/utils/adt/varlena.c#L184
     PG_RETURN_TEXT_P(cstring_to_text(full_name));
 }
