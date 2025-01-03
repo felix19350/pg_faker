@@ -66,7 +66,7 @@ _fake_age(int min_age)
 		char		error_msg[64];
 
 		sprintf(error_msg, "That is not a reasonable age. Max supported age is %.13d", max_reasonable_age);
-		ereport(ERROR, errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg(error_msg));
+		ereport(ERROR, errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg(error_msg));
 	}
 
 	return min_age + (rand() % (max_reasonable_age - min_age));
