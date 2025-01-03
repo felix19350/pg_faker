@@ -1,2 +1,5 @@
 # build directory for C project
 ./src/c/build
+
+# Test results
+./tests/c/results
