@@ -2,7 +2,7 @@
 .vscode
 
 # build directory for C project
-./src/c/build
+src/c/build
 
 # Test results
-./tests/c/results
+tests/c/results

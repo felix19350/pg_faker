@@ -3,6 +3,10 @@ PG_INCLUDE_DIR := /usr/include/postgresql/17/server
 BUILD_DIR := ./build
 CUSTOM_FN_FILE := pg_faker
 
+.PHONY: format
+format:
+	pgindent --typedefs=typedefs.list *.c
+
 .PHONY: build
 build:
 # make build dir
