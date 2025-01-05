@@ -1,0 +1,2 @@
+comment = 'An extension that implements a set of utility functions for faking common data.'
+default_version = '0.1'

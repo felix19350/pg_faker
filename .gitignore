@@ -6,3 +6,8 @@ src/c/build
 
 # Test results
 tests/c/results
+
+# C Compilation artifacts
+*.so
+*.o
+*.bc

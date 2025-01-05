@@ -1,3 +1,4 @@
+# Use this makefile to set up your Postgres development container
 DOCKER_TAG := postgres:dev
 POSTGRES_PASSWORD := password
 

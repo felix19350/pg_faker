@@ -1,19 +1,18 @@
 # pg_faker
 
-DISCLAIMER: This is merely a learning exercise to get familiarized with the development of Postgresql custom functions.
+DISCLAIMER: This is merely a learning exercise to get familiarized with the development of Postgresql extensions.
 
-The full reference can be found [here](https://www.postgresql.org/docs/current/xfunc-c.html).
-This project provides a set of C custom functions that implement various utility methods to create mock data, somewhat inspired by projects like [Faker](https://faker.readthedocs.io/en/master/).
-
-The full reference for custom functions can be found [here](https://www.postgresql.org/docs/current/xfunc-c.html).
+This extension provides a set of C custom functions that implement various utility methods to create mock data, somewhat inspired by projects like [Faker](https://faker.readthedocs.io/en/master/).
 
 ## Project structure
 
 The project has the following structure:
 
 ```
+├── dev-infra // Development infrastructure
+├── extension // Postgres extension definition
 ├── src
-│   └── c    // C source code for the custom functions
+│   └── c    // C source code for the custom functions
 └── tests
     └── c
         ├── expected // Expected results for each test
@@ -21,22 +20,28 @@ The project has the following structure:
 
 ```
 
+The `dev-infra` folder contains a ready to use Postgres 17 container that can be used as a development environment
+
+The `extension` folder contains the Postgresql extension definition and the Makefile that should be used to build and test the extension
+
 The `src` folder contains different implementations of a simple function in different languages (currently only C).
 
-The `tests` folder contains the unit tests for the implemented
-custom functions.
+The `tests` folder contains the unit tests for the implemented custom functions.
+
+## Using the provided development environment
 
 The project provides a Postgres 17 docker image that mounts the project directory to `/usr/share/pg-custom-functions` and can be used as a self-contained development environment - don't use it for production purposes.
 
-You can build the Docker image using the `make build-container` command and then run it using `make run-container`. From there you can create a shell to that container and start hacking or attach Visual Studio Code to a running docker container.
+You can build the Docker image using Makefile in the `dev-infra` folder. Use `make build-container` command and then run it using `make run-container`. From there you can create a shell to that container and start hacking or attach Visual Studio Code to a running docker container.
 
 ## Building the project
 
 In order to build the custom function the the libraries and headers for C language backend development are required (`postgresql-server-dev-17`).
 
-The `./src/c` directory contains the source code for the extension and it needs to be compiled as a shared library so it can be dynamically loaded by Postgresql (see [official docs](https://www.postgresql.org/docs/17/xfunc-c.html#DFUNC) for more details).
+The `./src/c` directory contains the source code for the extension and it needs to be compiled as a shared library so it can be dynamically loaded by Postgresql. In order to build the code, use the Makefile in
+the `extension` directory and run the `make install` command. If this command is successful, you are ready to go.
 
-This can be accomplished by running the `make build` command. The `build` target compiles the custom functions and moves the resulting shared library to the posgresql lib dir where the custom functions can be resolved by Postgresql.
+This basically takes the compiled shared library and places it in the correct directory (e.g. `/usr/lib/postgresql/17/lib`) and copies the extension control and data file to the correct directory (e.g. `/usr/share/postgresql/17/extension`)
 
 ## Using the custom functions
 
@@ -45,9 +50,7 @@ In order to use the custom functions in Postgresql you need to connect to the se
 The custom functions need to be created in the server and this can be achieved with the following commands:
 
 ```sql
-CREATE FUNCTION fake_person_name() RETURNS text AS 'pg_faker', 'fake_person_name' LANGUAGE C STRICT;
-CREATE FUNCTION fake_age() RETURNS integer AS 'pg_faker', 'fake_age_no_minimum' LANGUAGE C STRICT;
-CREATE FUNCTION fake_age(integer) RETURNS integer AS 'pg_faker', 'fake_age' LANGUAGE C STRICT;
+CREATE EXTENSION pg_faker;
 ```
 
 At this point the functions can be executed, for example:
@@ -79,10 +82,45 @@ A test is comprised of two elements:
 * The test SQL script to execute (in the `sql` directory)
 * The expected outputs for the test (in the `expected` directory)
 
-The tests can be executed by running the `make installcheck` command, which will connect to the development server and run the test SQL script and compare the output with the expectations.
-
-The Makefile in this directory extends from the Postgresql extensions makefile and sets the `REGRESS` variable to point to the test SQL scripts (without the .sql extension).
+The tests can be executed by running the `make installcheck` command (from the Makefile in the `extension` directory), which will connect to the development server
+and run the test SQL script and compare the output with the expectations.
 
 After running the tests a new `results` directory is created with the output and the diff (if there are any differences between the expectations and the output).
 
-The reference documentation for running tests can be found [here](https://www.postgresql.org/docs/current/regress-run.html).
+
+## Development tips and tricks
+
+### Formating the code
+
+You can format the code using the [pgindent](https://github.com/postgres/postgres/tree/master/src/tools/pgindent) utility. For this, use the Makefile in
+the `extension` directory and run the `make format` command
+
+### Setting up VS Code
+
+If you are using VS Code you can create a specific configuration for the provided container development environment by creating a `.vscode/c_cpp_properties.json` file with the following contents (your mileage may vary especially if you are using an ARM CPU):
+
+```json
+    "configurations": [
+        {
+            "name": "Dev container",
+            "intelliSenseMode": "linux-gcc-x86",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "/usr/include/postgresql/17/server",
+                "/usr/include/postgresql",
+                "/usr/include/x86_64-linux-gnu"
+            ],
+            "cStandard": "c89",
+            "compilerPath": "/usr/bin/gcc",
+            "compilerArgs": [
+                "-I/usr/include/postgresql -I/usr/include/postgresql/17/server -Wall"
+            ]
+        }
+    ]
+```
+
+## Useful Resources:
+
+* [Postgres custom functions](https://www.postgresql.org/docs/current/xfunc-c.html)
+* [Postgres extensions](https://www.postgresql.org/docs/17/extend-extensions.html)
+* [Postgres test infrastructure](https://www.postgresql.org/docs/current/regress-run.html)

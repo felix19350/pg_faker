@@ -45,7 +45,7 @@ fake_person_name(PG_FUNCTION_ARGS)
 	char	   *selected_surname = surnames[rand() % surnames_len];
 
 	int			length = strlen(selected_name) + 1 + strlen(selected_surname);
-	char		full_name[length];
+	char	   *full_name = palloc(length);
 
 	sprintf(full_name, "%s %s", selected_name, selected_surname);
 
@@ -56,6 +56,8 @@ fake_person_name(PG_FUNCTION_ARGS)
 	PG_RETURN_TEXT_P(cstring_to_text(full_name));
 }
 
+/* Incredibly pedantic stuff... */
+int			_fake_age(int min_age);
 int
 _fake_age(int min_age)
 {
@@ -63,10 +65,7 @@ _fake_age(int min_age)
 
 	if (min_age > max_reasonable_age)
 	{
-		char		error_msg[64];
-
-		sprintf(error_msg, "That is not a reasonable age. Max supported age is %.13d", max_reasonable_age);
-		ereport(ERROR, errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg(error_msg));
+		ereport(ERROR, errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg("That is not a reasonable age. Max supported age is %.6d", max_reasonable_age));
 	}
 
 	return min_age + (rand() % (max_reasonable_age - min_age));

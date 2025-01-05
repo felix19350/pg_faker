@@ -1,15 +1,20 @@
--- Custom assertion function
+-- custom assertions
 CREATE FUNCTION assert_valid_age(result integer, min_age integer) RETURNS boolean AS $$
 BEGIN
     RETURN result >= min_age AND result <= 100; -- max age is hard-coded 
 END
 $$ LANGUAGE plpgsql;
 
+CREATE FUNCTION assert_person_name(result text) RETURNS boolean AS $$
+BEGIN
+    RETURN character_length(result) > 0;
+END
+$$ LANGUAGE plpgsql;
 
--- Create the custom functions
-CREATE FUNCTION fake_age() RETURNS integer AS 'pg_faker', 'fake_age_no_minimum' LANGUAGE C STRICT;
-CREATE FUNCTION fake_age(integer) RETURNS integer AS 'pg_faker', 'fake_age' LANGUAGE C STRICT;
+-- Create extension
+CREATE extension pg_faker;
 
--- Run the tests
+-- Run tests
+SELECT assert_person_name(fake_person_name());
 SELECT assert_valid_age(fake_age(), 0);
 SELECT assert_valid_age(fake_age(18), 18);
